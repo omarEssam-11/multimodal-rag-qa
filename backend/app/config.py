@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     )
 
     # App
-    app_name: str = "Multimodal RAG Studio"
+    app_name: str = "Multimodal RAG QA"
     app_env: str = "development"
     log_level: str = "INFO"
     api_host: str = "0.0.0.0"

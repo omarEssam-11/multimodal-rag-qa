@@ -40,7 +40,7 @@ def main():
     fig.patch.set_facecolor("#0f172a")
 
     # Title
-    ax.text(8, 9.6, "Multimodal RAG Studio — Architecture", ha="center", va="center",
+    ax.text(8, 9.6, "Multimodal RAG QA — Architecture", ha="center", va="center",
             fontsize=16, color="white", fontweight="bold")
 
     # ---- Ingestion pipeline (left side) ----

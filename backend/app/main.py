@@ -1,4 +1,4 @@
-"""Multimodal RAG Studio — FastAPI application entry point."""
+"""Multimodal RAG QA — FastAPI application entry point."""
 
 from __future__ import annotations
 

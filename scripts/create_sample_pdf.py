@@ -1,4 +1,4 @@
-"""Generate a sample PDF for testing Multimodal RAG Studio.
+"""Generate a sample PDF for testing Multimodal RAG QA.
 
 Creates a multi-page PDF with text paragraphs, a figure (diagram),
 a chart, and figure captions — perfect for demonstrating cross-modal
@@ -62,7 +62,7 @@ def build_pdf(output: Path) -> None:
 
     # Page 1: intro text
     p1 = doc.new_page()
-    p1.insert_text((72, 72), "Multimodal RAG Studio — Sample Document", fontsize=16)
+    p1.insert_text((72, 72), "Multimodal RAG QA — Sample Document", fontsize=16)
     p1.insert_text((72, 110), "This document describes a transformer-based architecture for", fontsize=11)
     p1.insert_text((72, 128), "multimodal question answering. The system combines text and", fontsize=11)
     p1.insert_text((72, 146), "visual evidence to produce grounded answers.", fontsize=11)

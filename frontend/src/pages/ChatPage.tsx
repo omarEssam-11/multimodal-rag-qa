@@ -177,7 +177,7 @@ export default function ChatPage() {
               <Sparkles className="h-8 w-8" />
             </div>
             <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Multimodal RAG Studio
+              Multimodal RAG QA
             </h2>
             <p className="mb-8 max-w-md text-center text-sm text-gray-500 dark:text-gray-400">
               Ask questions about your documents using text, images, or both.

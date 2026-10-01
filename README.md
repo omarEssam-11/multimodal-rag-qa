@@ -1,4 +1,4 @@
-# Multimodal RAG Studio — CLIP-Powered Multimodal Document QA
+# Multimodal RAG QA — CLIP-Powered Multimodal Document QA
 
 A production-style, end-to-end **Multimodal Retrieval-Augmented Generation** application. Upload PDFs containing text, figures, diagrams, charts, and tables — then ask questions using **text**, **images**, or **text + image** together. The system retrieves relevant text *and* visual evidence using **CLIP cross-modal embeddings** and generates grounded, cited answers with a vision-language model.
 
@@ -36,7 +36,7 @@ Traditional RAG systems index only text. But real documents — research papers,
 
 ### Solution
 
-Multimodal RAG Studio indexes **both** textual and visual content into a vector database using two complementary embedding strategies:
+Multimodal RAG QA indexes **both** textual and visual content into a vector database using two complementary embedding strategies:
 
 1. **A dedicated text embedding model** (`all-MiniLM-L6-v2`) for long document chunks — optimized for semantic textual similarity.
 2. **CLIP** (`clip-ViT-B-32`) for **cross-modal** retrieval — embedding images and short text into a *shared* vector space so a text query can find a relevant figure (and an image query can find related text) even when no words overlap.

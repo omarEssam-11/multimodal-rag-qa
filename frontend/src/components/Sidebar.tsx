@@ -53,7 +53,7 @@ export default function Sidebar() {
           <div>
             <h1 className="text-sm font-semibold leading-tight">Multimodal RAG</h1>
             <p className="text-[11px] leading-tight text-gray-500 dark:text-gray-400">
-              Studio
+              QA
             </p>
           </div>
         </div>
