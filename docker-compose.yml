@@ -1,0 +1,48 @@
+services:
+  # Qdrant vector database
+  qdrant:
+    image: qdrant/qdrant:v1.12.2
+    container_name: mm-rag-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+  # FastAPI backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mm-rag-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override Qdrant to use the containerized server
+      QDRANT_MODE: remote
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+
+  # React frontend (served via nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mm-rag-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:
