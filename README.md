@@ -178,8 +178,8 @@ Relevant Text  Relevant Images
 
 ```bash
 # 1. Clone and enter the project
-git clone https://github.com/omarEssam-11/multimodal-rag-studio.git
-cd multimodal-rag-studio
+git clone https://github.com/omarEssam-11/multimodal-rag-qa.git
+cd multimodal-rag-qa
 
 # 2. Configure environment
 cp backend/.env.example backend/.env
@@ -383,7 +383,7 @@ Tests cover: PDF extraction, chunking, CLIP/text embeddings, Qdrant operations, 
 ## Project Structure
 
 ```
-multimodal-rag-studio/
+multimodal-rag-qa/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py              # FastAPI entry point
