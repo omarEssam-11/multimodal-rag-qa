@@ -24,6 +24,7 @@ import numpy as np
 from PIL import Image
 
 from app.config import settings
+from app.services.bm25_service import bm25_service
 from app.services.embedding_service import embedding_service
 from app.services.vector_store import vector_store
 from app.utils.logger import get_logger
@@ -144,10 +145,54 @@ class MultimodalRetriever:
     # ---------------- Text retrieval ----------------
 
     def _retrieve_text(self, text: str) -> list[RetrievalResult]:
-        """Text query -> text embedding model -> text collection."""
+        """Hybrid text retrieval: BM25 (lexical) + vector (semantic), fused via RRF."""
+        # Vector search
         vec = embedding_service.embed_chunks([text])[0]
-        hits = vector_store.search_text(vec, limit=self.top_k_text * 2)
-        return [self._to_result(h, "text") for h in hits]
+        vector_hits = vector_store.search_text(vec, limit=self.top_k_text * 2)
+        # BM25 search
+        bm25_hits = bm25_service.search(text, limit=self.top_k_text * 2)
+        # Reciprocal Rank Fusion
+        return self._rrf_fuse(vector_hits, bm25_hits)
+
+    def _rrf_fuse(
+        self,
+        vector_hits: list[dict],
+        bm25_hits: list[dict],
+        k: int = 60,
+    ) -> list[RetrievalResult]:
+        """Reciprocal Rank Fusion: score = sum(1 / (k + rank))."""
+        scores: dict[str, float] = {}
+        payloads: dict[str, dict] = {}
+
+        for rank, hit in enumerate(vector_hits):
+            doc_id = hit["id"]
+            scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank + 1)
+            payloads[doc_id] = hit
+
+        for rank, hit in enumerate(bm25_hits):
+            doc_id = hit["id"]
+            scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank + 1)
+            if doc_id not in payloads:
+                payloads[doc_id] = hit
+
+        # Sort by fused score
+        sorted_ids = sorted(scores.keys(), key=lambda x: scores[x], reverse=True)
+        results = []
+        for doc_id in sorted_ids:
+            hit = payloads[doc_id]
+            results.append(
+                RetrievalResult(
+                    id=doc_id,
+                    document_id=hit["payload"].get("document_id", ""),
+                    document_name=hit["payload"].get("document_name", "Unknown"),
+                    page_number=hit["payload"].get("page_number", 0),
+                    content_type="text",
+                    score=scores[doc_id],
+                    content=hit["payload"].get("content") or "",
+                    metadata=hit["payload"],
+                )
+            )
+        return results
 
     def _retrieve_text_via_image_captions(
         self, image_hits: list[RetrievalResult]

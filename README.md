@@ -129,9 +129,10 @@ Relevant Text  Relevant Images
 - Re-index and delete support
 
 ### Multimodal Retrieval
-- **Text-only** queries → text chunks + CLIP-matched images
+- **Text-only** queries → hybrid text retrieval (BM25 + vector) + CLIP-matched images
 - **Image-only** queries → visually similar images + related text
 - **Text + image** queries → fused cross-modal retrieval
+- **Hybrid search**: BM25 lexical + vector semantic, fused via Reciprocal Rank Fusion (RRF)
 - Configurable result fusion weights
 - Score thresholding and top-k control
 
@@ -164,7 +165,7 @@ Relevant Text  Relevant Images
 | Text Embeddings | sentence-transformers (`all-MiniLM-L6-v2`) |
 | Cross-modal Embeddings | sentence-transformers CLIP (`clip-ViT-B-32`) |
 | Vector Database | Qdrant (local embedded or Docker) |
-| LLM/VLM | Ollama (LLaVA) or OpenAI-compatible API |
+| LLM/VLM | OpenRouter (Qwen2.5-VL-72B) or Ollama / OpenAI-compatible |
 | Frontend | React 18, TypeScript, Vite, Tailwind CSS |
 | State | Zustand |
 | Icons | Lucide React |
@@ -277,8 +278,8 @@ All configuration lives in `backend/.env`. Copy from `.env.example`.
 | `CHUNK_SIZE` / `CHUNK_OVERLAP` | `500` / `80` | Text chunking params |
 | `TOP_K_TEXT` / `TOP_K_IMAGES` | `5` / `5` | Retrieval top-k |
 | `TEXT_RETRIEVAL_WEIGHT` / `IMAGE_RETRIEVAL_WEIGHT` | `0.6` / `0.4` | Fusion weights |
-| `LLM_PROVIDER` | `ollama` | `ollama` or `openai_compatible` |
-| `LLM_MODEL` | `llava:7b` | Ollama model name |
+| `LLM_PROVIDER` | `openai_compatible` | `ollama` or `openai_compatible` |
+| `LLM_MODEL` | `qwen/qwen2.5-vl-72b-instruct` | OpenRouter/Ollama model name |
 | `OPENAI_API_KEY` / `OPENAI_BASE_URL` / `OPENAI_MODEL` | — | OpenAI-compatible provider |
 | `MAX_UPLOAD_MB` | `50` | Max PDF upload size |
 | `MAX_HISTORY_MESSAGES` | `10` | Bounded chat history |
@@ -422,31 +423,6 @@ multimodal-rag-studio/
 ├── docker-compose.yml
 └── README.md
 ```
-
----
-
-## Limitations
-
-- **CLIP text encoder** is designed for short captions, not long paragraphs — hence the separate text model for chunks.
-- **Local Qdrant** (embedded mode) is single-node and not suitable for high-concurrency production; use the Docker/remote mode for that.
-- **Conversation history** is in-memory (not persisted across restarts).
-- **Figure caption association** uses heuristic regex patterns; complex layouts may not be captured.
-- **VLM quality** depends on the model — `llava:7b` is a good local default but larger models give better answers.
-
----
-
-## Future Improvements
-
-- [ ] Hybrid search (BM25 + vector) for text retrieval
-- [ ] Multi-document cross-referencing in answers
-- [ ] Streaming responses (SSE) for faster perceived latency
-- [ ] Persistent conversation history (database-backed)
-- [ ] User authentication and multi-tenancy
-- [ ] Support for additional file types (DOCX, PPTX, HTML)
-- [ ] Advanced table extraction and indexing
-- [ ] Evaluation harness (retrieval accuracy, answer groundedness)
-- [ ] GPU acceleration for embeddings
-- [ ] Re-ranking with a cross-encoder
 
 ---
 

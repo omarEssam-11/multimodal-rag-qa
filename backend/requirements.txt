@@ -18,6 +18,9 @@ numpy==2.2.1
 # Vector database
 qdrant-client==1.12.2
 
+# BM25 for hybrid search
+rank-bm25==0.2.2
+
 # HTTP client for LLM providers
 httpx==0.28.1
 

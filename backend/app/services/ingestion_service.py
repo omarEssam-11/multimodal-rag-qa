@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Literal
 
 from app.config import settings
+from app.services.bm25_service import bm25_service
 from app.services.embedding_service import embedding_service
 from app.services.pdf_processor import PDFProcessor, PDFProcessingError
 from app.services.text_chunker import TextChunker
@@ -175,7 +176,14 @@ class IngestionService:
                 )
                 all_chunks.extend(chunks)
 
-            # 4. Embed text chunks
+            # 4. Build BM25 index (for hybrid search)
+            if all_chunks:
+                bm25_service.build(
+                    ids=[c.chunk_id for c in all_chunks],
+                    texts=[c.content for c in all_chunks],
+                )
+
+            # 5. Embed text chunks
             text_vectors = None
             if all_chunks:
                 texts = [c.content for c in all_chunks]
