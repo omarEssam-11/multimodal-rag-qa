@@ -26,6 +26,12 @@ data/extracted_images/*
 !data/extracted_images/.gitkeep
 data/qdrant_storage/*
 !data/qdrant_storage/.gitkeep
+backend/data/uploads/*
+!backend/data/uploads/.gitkeep
+backend/data/extracted_images/*
+!backend/data/extracted_images/.gitkeep
+backend/data/*.png
+backend/data/*.pdf
 
 # Node
 node_modules/
