@@ -63,7 +63,8 @@ class Settings(BaseSettings):
     llm_provider: str = "ollama"  # ollama | openai_compatible
     llm_model: str = "llava:7b"
     llm_temperature: float = 0.2
-    llm_max_tokens: int = 1024
+    llm_max_tokens: int = 4096
+    llm_max_images: int = 3  # vision models often cap images/request (Groq qwen: 3)
     llm_timeout: int = 120
     ollama_base_url: str = "http://localhost:11434"
     openai_api_key: str = ""

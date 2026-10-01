@@ -158,24 +158,43 @@ class OpenAICompatibleProvider(BaseLLMProvider):
             "temperature": temperature if temperature is not None else settings.llm_temperature,
             "max_tokens": max_tokens or settings.llm_max_tokens,
         }
+        # Disable thinking on providers that accept it (OpenRouter) so thinking
+        # models answer directly instead of burning max_tokens on reasoning
+        # (which yields content=None). Groq rejects the param as unsupported.
+        if "openrouter" in self.base_url:
+            payload["reasoning"] = {"enabled": False}
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
-        try:
-            resp = httpx.post(
-                f"{self.base_url}/chat/completions",
-                json=payload,
-                headers=headers,
-                timeout=settings.llm_timeout,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            return data["choices"][0]["message"]["content"].strip()
-        except httpx.HTTPStatusError as e:
-            raise LLMError(f"LLM API error {e.response.status_code}: {e.response.text[:300]}") from e
-        except (httpx.RequestError, KeyError) as e:
-            raise LLMError(f"LLM request failed: {e}") from e
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                resp = httpx.post(
+                    f"{self.base_url}/chat/completions",
+                    json=payload,
+                    headers=headers,
+                    timeout=settings.llm_timeout,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                msg = data["choices"][0]["message"]
+                # Thinking models may return content=None with reasoning populated
+                content = msg.get("content")
+                if not content:
+                    content = msg.get("reasoning") or ""
+                return content.strip()
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429 and attempt < max_retries - 1:
+                    wait = [5, 15, 30, 60][attempt] if attempt < 4 else 60
+                    logger.warning("Rate limited (429), retrying in %ds (attempt %d/%d)...", wait, attempt + 1, max_retries)
+                    import time
+                    time.sleep(wait)
+                    continue
+                raise LLMError(f"LLM API error {e.response.status_code}: {e.response.text[:300]}") from e
+            except (httpx.RequestError, KeyError) as e:
+                raise LLMError(f"LLM request failed: {e}") from e
+        raise LLMError("LLM request failed after retries")
 
 
 def images_in(messages: Sequence[ChatMessage]) -> list[str]:

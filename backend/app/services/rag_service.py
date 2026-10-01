@@ -120,8 +120,9 @@ class RAGService:
         user_images: list[str] = []
         if pil_image is not None:
             user_images.append(self.provider._image_to_data_url(pil_image))
-        # attach retrieved images as evidence
-        for r in image_evidence:
+        # attach retrieved images as evidence (respect the provider's image cap)
+        budget = max(settings.llm_max_images - len(user_images), 0)
+        for r in image_evidence[:budget]:
             img_path = r.metadata.get("image_path")
             if img_path:
                 user_images.append(self.provider._image_to_data_url(img_path))

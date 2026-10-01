@@ -2,7 +2,17 @@
 
 from __future__ import annotations
 
+import asyncio
+import sys
 from contextlib import asynccontextmanager
+
+# Windows: the default Proactor event loop aborts the whole server with
+# "OSError: [WinError 64] The specified network name is no longer available"
+# whenever a client (browser / Vite proxy) drops a keep-alive connection.
+# The Selector loop tolerates those aborted accepts, so images and health
+# checks keep serving instead of killing uvicorn.
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
