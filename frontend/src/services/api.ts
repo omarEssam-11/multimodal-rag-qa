@@ -143,8 +143,11 @@ export const api = {
     return handleResponse<RetrieveResponse>(res);
   },
 
-  // Images
+  // Images — accepts a bare image id or a full /api/images/... path
   imageUrl(imageId: string): string {
+    if (imageId.startsWith("/") || imageId.startsWith("http")) {
+      return imageId;
+    }
     return `${BASE_URL}/images/${imageId}`;
   },
 };
