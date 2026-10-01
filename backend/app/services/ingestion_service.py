@@ -265,8 +265,11 @@ class IngestionService:
             shutil.rmtree(img_dir, ignore_errors=True)
         # delete original
         upload_path = Path(record.metadata.get("upload_path", ""))
-        if upload_path.exists():
-            upload_path.unlink()
+        if upload_path and str(upload_path) not in ("", ".") and upload_path.exists():
+            try:
+                upload_path.unlink()
+            except OSError as e:
+                logger.warning("Could not delete upload file %s: %s", upload_path, e)
         document_store.delete(document_id)
 
     @staticmethod
